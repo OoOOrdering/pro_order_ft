@@ -6,6 +6,7 @@ import type { Order } from "@/types/swagger";
 import Button from "@/components/Button";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import { connectOrderSocket, onOrderStatusChanged } from "@/utils/orderSocket";
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -30,6 +31,16 @@ export default function OrderDetailPage() {
       })
       .catch((err) => setError(err.response?.data?.detail || err.message))
       .finally(() => setLoading(false));
+  }, [orderId]);
+
+  useEffect(() => {
+    connectOrderSocket();
+    onOrderStatusChanged((data) => {
+      if (data.orderId === orderId) {
+        setLoading(true);
+        getOrder(Number(orderId)).then((orderRes) => setOrder(orderRes.data)).finally(() => setLoading(false));
+      }
+    });
   }, [orderId]);
 
   const handleCancel = async () => {

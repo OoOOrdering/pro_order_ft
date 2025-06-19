@@ -288,3 +288,10 @@ export interface WorkCreateUpdate {
   due_date?: string;
   completed_at?: string;
 }
+
+export interface CSPost {
+  id: number;
+  title: string;
+  content: string;
+  // TODO: 실제 API 응답에 맞게 필드 추가
+}

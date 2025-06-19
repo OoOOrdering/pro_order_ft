@@ -1,21 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getReviewList } from "@/api/swagger";
 import ErrorMessage from "@/components/ErrorMessage";
 import Loading from "@/components/Loading";
+import { useList } from "@/hooks/useList";
+import type { Review } from "@/types/swagger";
 
 export default function ReviewPage() {
-  const [list, setList] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setLoading(true);
-    getReviewList()
-      .then((res) => setList(res.data))
-      .catch((err) => setError(err.response?.data?.detail || err.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const { list, loading, error } = useList<Review>(async () => {
+    const res = await getReviewList();
+    return res.data;
+  });
 
   return (
     <div className="max-w-lg mx-auto p-6">

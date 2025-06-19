@@ -1,0 +1,6 @@
+{
+  "order": "Order",
+  "chat": "Chat",
+  "notification": "Notification",
+  "logout": "Logout"
+}

@@ -41,9 +41,15 @@ export default function Button({
   const classes = cn(baseClasses, variantClasses[variant], sizeClasses[size], widthClass, className)
 
   return (
-    <button className={classes} disabled={disabled || loading} {...props}>
+    <button
+      className={classes + " min-h-[44px] min-w-[44px]"} // 모바일 터치 영역 확대
+      disabled={disabled || loading}
+      aria-busy={loading}
+      aria-label={props['aria-label'] || (typeof children === 'string' ? children : undefined)}
+      {...props}
+    >
       {loading && (
-        <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" aria-hidden="true">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path
             className="opacity-75"

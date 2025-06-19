@@ -1,73 +1,78 @@
 "use client"
+import { useForm, useFieldArray } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
 import { useState } from "react"
-import type React from "react"
+import React from "react"
 
 import { createOrder } from "@/api/swagger"
 import type { OrderCreate, OrderItem } from "@/types/swagger"
-import Button from "../../components/Button"
-import Input from "../../components/Input"
-import Card from "../../components/Card"
-import PageHeader from "../../components/PageHeader"
-import Loading from "../../components/Loading"
-import ErrorMessage from "../../components/ErrorMessage"
+import Button from "@/components/Button"
+import Input from "@/components/Input"
+import Card from "@/components/Card"
+import PageHeader from "@/components/PageHeader"
+import Loading from "@/components/Loading"
+import ErrorMessage from "@/components/ErrorMessage"
 import { useRouter } from "next/navigation"
 
 const defaultItem = { product_name: "", quantity: 1, price: "0" }
 
+const schema = yup.object().shape({
+  shipping_address: yup.string().required("주소를 입력하세요."),
+  shipping_phone: yup.string().required("연락처를 입력하세요."),
+  shipping_name: yup.string().required("수령인을 입력하세요."),
+  shipping_memo: yup.string(),
+  items: yup.array().of(
+    yup.object().shape({
+      product_name: yup.string().required("상품명을 입력하세요."),
+      quantity: yup.number().min(1, "수량은 1 이상이어야 합니다.").required("수량을 입력하세요.").typeError("수량은 숫자여야 합니다."),
+      price: yup.number().min(0, "가격은 0 이상이어야 합니다.").required("가격을 입력하세요.").typeError("가격은 숫자여야 합니다.")
+    })
+  ).min(1, "최소 1개 상품을 입력하세요."),
+  payment_method: yup.string().required("결제수단을 선택하세요."),
+  total_amount: yup.string(),
+});
+
 export default function OrderCreatePage() {
-  const [form, setForm] = useState<OrderCreate>({
-    shipping_address: "",
-    shipping_phone: "",
-    shipping_name: "",
-    shipping_memo: "",
-    items: [{ ...defaultItem }],
-    payment_method: "카드",
-    total_amount: "0",
-  })
+  const { register, control, handleSubmit, formState: { errors, isSubmitting }, setValue, watch } = useForm<OrderCreate>({
+    defaultValues: {
+      shipping_address: "",
+      shipping_phone: "",
+      shipping_name: "",
+      shipping_memo: "",
+      items: [{ ...defaultItem }],
+      payment_method: "카드",
+      total_amount: "0",
+    },
+    resolver: yupResolver(schema),
+  });
+  const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const router = useRouter()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
-  }
-
-  const handleItemChange = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const items = [...form.items]
-    items[idx] = { ...items[idx], [e.target.name]: e.target.value }
-    setForm((f) => ({ ...f, items }))
-    updateTotal(items)
-  }
-
-  const addItem = () => {
-    setForm((f) => ({ ...f, items: [...f.items, { ...defaultItem }] }))
-  }
-
-  const removeItem = (idx: number) => {
-    const items = form.items.filter((_, i) => i !== idx)
-    setForm((f) => ({ ...f, items }))
-    updateTotal(items)
-  }
-
   const updateTotal = (items: OrderItem[]) => {
-    const total = items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0)
-    setForm((f) => ({ ...f, total_amount: String(total) }))
-  }
+    const total = items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+    setValue("total_amount", String(total));
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setSuccess("")
-    setLoading(true)
+  // 상품 정보 변경 시 합계 자동 계산
+  const items = watch("items");
+  React.useEffect(() => { updateTotal(items); }, [items]);
+
+  const onSubmit = async (data: OrderCreate) => {
+    setError("");
+    setSuccess("");
+    setLoading(true);
     try {
-      const res = await createOrder(form)
-      setSuccess("주문이 생성되었습니다!")
-      setTimeout(() => router.push(`/order/${res.data.id}`), 1500)
+      const res = await createOrder(data);
+      setSuccess("주문이 생성되었습니다!");
+      setTimeout(() => router.push(`/order/${res.data.id}`), 1500);
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message)
+      setError(err.response?.data?.detail || err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -81,8 +86,8 @@ export default function OrderCreatePage() {
         breadcrumb={[{ label: "주문", href: "/order" }, { label: "새 주문" }]}
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Shipping Information */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* 배송 정보 */}
         <Card>
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,40 +103,33 @@ export default function OrderCreatePage() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              name="shipping_name"
-              value={form.shipping_name}
-              onChange={handleChange}
+              {...register("shipping_name")}
               label="수령인"
               placeholder="받으실 분 성함"
-              required
+              error={errors.shipping_name?.message}
             />
             <Input
-              name="shipping_phone"
-              value={form.shipping_phone}
-              onChange={handleChange}
+              {...register("shipping_phone")}
               label="연락처"
               placeholder="010-0000-0000"
-              required
+              error={errors.shipping_phone?.message}
             />
           </div>
           <Input
-            name="shipping_address"
-            value={form.shipping_address}
-            onChange={handleChange}
-            label="배송 주소"
-            placeholder="상세 주소를 입력해주세요"
-            required
+            {...register("shipping_address")}
+            label="주소"
+            placeholder="배송지 주소"
+            error={errors.shipping_address?.message}
           />
           <Input
-            name="shipping_memo"
-            value={form.shipping_memo}
-            onChange={handleChange}
+            {...register("shipping_memo")}
             label="배송 메모"
-            placeholder="배송 시 요청사항 (선택사항)"
+            placeholder="요청사항 등"
+            error={errors.shipping_memo?.message}
           />
         </Card>
 
-        {/* Order Items */}
+        {/* 상품 정보 */}
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -145,64 +143,45 @@ export default function OrderCreatePage() {
               </svg>
               주문 상품
             </h3>
-            <Button type="button" variant="outline" size="sm" onClick={addItem}>
+            <Button type="button" variant="outline" size="sm" onClick={() => append({ ...defaultItem })}>
               상품 추가
             </Button>
           </div>
 
           <div className="space-y-4">
-            {form.items.map((item, idx) => (
-              <div key={idx} className="p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-700">상품 #{idx + 1}</span>
-                  {form.items.length > 1 && (
-                    <Button type="button" variant="danger" size="sm" onClick={() => removeItem(idx)}>
-                      삭제
-                    </Button>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {fields.map((field, idx) => {
+              const item = items[idx] || {};
+              return (
+                <div key={field.id || idx} className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2">
                   <Input
-                    name="product_name"
-                    value={item.product_name}
-                    onChange={(e) => handleItemChange(idx, e)}
+                    {...register(`items.${idx}.product_name` as const)}
                     label="상품명"
-                    placeholder="상품명을 입력하세요"
-                    required
+                    error={errors.items?.[idx]?.product_name?.message}
                   />
                   <Input
-                    name="quantity"
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => handleItemChange(idx, e)}
+                    {...register(`items.${idx}.quantity` as const)}
                     label="수량"
-                    min={1}
-                    required
+                    type="number"
+                    error={errors.items?.[idx]?.quantity?.message}
                   />
                   <Input
-                    name="price"
+                    {...register(`items.${idx}.price` as const)}
+                    label="가격"
                     type="number"
-                    value={item.price}
-                    onChange={(e) => handleItemChange(idx, e)}
-                    label="단가 (원)"
-                    min={0}
-                    required
+                    error={errors.items?.[idx]?.price?.message}
                   />
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">{item.price && item.quantity ? (Number(item.price) * Number(item.quantity)).toLocaleString() : 0}원</span>
+                    <Button type="button" onClick={() => remove(idx)} variant="danger">삭제</Button>
+                  </div>
                 </div>
-                <div className="mt-2 text-right">
-                  <span className="text-sm text-gray-600">
-                    소계:{" "}
-                    <span className="font-semibold text-purple-600">
-                      {(Number(item.price) * Number(item.quantity)).toLocaleString()}원
-                    </span>
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
+            {errors.items?.message && <div className="text-destructive mt-2">{errors.items.message}</div>}
           </div>
         </Card>
 
-        {/* Payment Information */}
+        {/* 결제 정보 */}
         <Card>
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,9 +198,7 @@ export default function OrderCreatePage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">결제 방법</label>
               <select
-                name="payment_method"
-                value={form.payment_method}
-                onChange={handleChange}
+                {...register("payment_method")}
                 className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="카드">신용카드</option>
@@ -232,7 +209,7 @@ export default function OrderCreatePage() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-purple-600">
-                총 {Number(form.total_amount).toLocaleString()}원
+                총 {Number(watch("total_amount")).toLocaleString()}원
               </div>
               <div className="text-sm text-gray-500">VAT 포함</div>
             </div>
@@ -247,10 +224,10 @@ export default function OrderCreatePage() {
             fullWidth
             loading={loading}
             disabled={
-              !form.shipping_name ||
-              !form.shipping_phone ||
-              !form.shipping_address ||
-              form.items.some((item) => !item.product_name)
+              !watch("shipping_name") ||
+              !watch("shipping_phone") ||
+              !watch("shipping_address") ||
+              fields.some((item) => !item.product_name)
             }
           >
             {loading ? "주문 생성 중..." : "주문하기"}

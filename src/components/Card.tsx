@@ -30,7 +30,12 @@ export default function Card({ children, className = "", padding = "md", shadow 
         paddingClasses[padding],
         shadowClasses[shadow],
         className,
+        // 모바일 반응형 샘플
+        "w-full max-w-full sm:max-w-md mx-auto",
       )}
+      role="region"
+      aria-label="카드 영역"
+      tabIndex={0}
     >
       {children}
     </div>

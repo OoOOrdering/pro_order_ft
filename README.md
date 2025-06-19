@@ -28,3 +28,23 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+## 보안/인증
+- refresh token은 httpOnly cookie로 관리 권장(SECURITY_GUIDE.md 참고)
+- CSP 헤더 적용(see next.config.js)
+
+## 테스트
+- 유닛: src/__tests__/*.test.tsx
+- E2E: playwright/cypress 샘플 추가 가능
+
+## 실시간 알림
+- src/utils/socket.ts 참고
+- 알림 UI: Toast, Badge 등 연동 샘플 구현 가능
+
+## 기타
+- SEO/OG: Head 태그에 og:title, og:description, og:image 등 추가 권장
+- PWA: next-pwa 등 적용 가능
+- API Mock: msw 등 샘플 적용 가능
+
+---
+더 궁금한 점은 언제든 문의하세요!

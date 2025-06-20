@@ -10,7 +10,8 @@
     "test": "jest",
     "check-env": "ts-node scripts/check-env.ts",
     "test:button": "jest src/__tests__/Button.test.tsx",
-    "test:notification": "ts-node scripts/send-test-notification.ts"
+    "test:notification": "ts-node scripts/send-test-notification.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@eslint/eslintrc": "latest",

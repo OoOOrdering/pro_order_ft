@@ -178,10 +178,12 @@ export default function ReviewDetail({
           onClick={() => setSelectedImage(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh] p-4">
-            <img
+            <Image
               src={selectedImage || "/placeholder.svg"}
               alt="확대된 리뷰 이미지"
               className="max-w-full max-h-full object-contain rounded-lg"
+              width={640}
+              height={480}
             />
             <button
               onClick={() => setSelectedImage(null)}

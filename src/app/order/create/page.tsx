@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { useState } from "react"
-import React from "react"
+import React, { useCallback } from "react"
 
 import { createOrder } from "@/api/swagger"
 import type { OrderCreate, OrderItem } from "@/types/swagger"
@@ -66,10 +66,10 @@ export default function OrderCreatePage() {
     },
   });
 
-  const updateTotal = (items: OrderItem[]) => {
+  const updateTotal = useCallback((items: OrderItem[]) => {
     const total = items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
     setValue("total_amount", String(total));
-  };
+  }, [setValue]);
 
   // 상품 정보 변경 시 합계 자동 계산
   const items = watch("items");

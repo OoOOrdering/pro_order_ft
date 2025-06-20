@@ -1,7 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-jest.mock('../components/DownloadOrderPdf', () => () => <div />);
+jest.mock('../components/DownloadOrderPdf', () => {
+  const Mock = () => <div />;
+  Mock.displayName = 'MockDownloadOrderPdf';
+  return Mock;
+});
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock('../api/swagger', () => ({ getOrderList: jest.fn(() => Promise.resolve({ data: [] })) }));
 import OrderPage from '../app/order/page';

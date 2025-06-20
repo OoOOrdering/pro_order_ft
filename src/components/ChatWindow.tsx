@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 
 import { useState, useRef, useEffect } from "react"
 import { cn } from "../lib/utils"
@@ -187,10 +188,12 @@ export default function ChatWindow({
               )}
             >
               {message.type === "image" && message.imageUrl && (
-                <img
+                <Image
                   src={message.imageUrl || "/placeholder.svg"}
                   alt="전송된 이미지"
                   className="max-w-full h-auto rounded-lg mb-2"
+                  width={320}
+                  height={240}
                 />
               )}
               <p className="text-sm">{message.content}</p>

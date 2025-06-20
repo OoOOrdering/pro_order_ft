@@ -5,6 +5,7 @@ import { cn } from "../lib/utils"
 import Button from "./Button"
 import Card from "./Card"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 interface UserProfile {
   id: string
@@ -90,10 +91,12 @@ export default function MyPage({ isAdmin = false, className }: MyPageProps) {
         <div className="flex items-center space-x-4">
           <div className="relative">
             {profile.profileImage ? (
-              <img
+              <Image
                 src={profile.profileImage || "/placeholder.svg"}
                 alt="프로필 이미지"
                 className="w-20 h-20 rounded-full object-cover border-4 border-primary/20"
+                width={80}
+                height={80}
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center border-4 border-primary/20">

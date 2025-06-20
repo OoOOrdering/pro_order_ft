@@ -27,7 +27,7 @@ export default function NoticeEditPage() {
       .catch(() =>
         Toast.show({ type: "error", message: error || "불러오기 실패" })
       );
-  }, [id]);
+  }, [id, error, fetch]);
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();

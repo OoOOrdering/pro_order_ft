@@ -6,6 +6,8 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }))
 jest.mock('../api/swagger', () => ({ getOrderList: jest.fn(() => Promise.resolve({ data: [] })) }));
 import OrderPage from '../app/order/page';
 
+OrderPage.displayName = "OrderPage"
+
 describe('OrderPage', () => {
   it('주문 목록 타이틀이 렌더링된다', async () => {
     render(

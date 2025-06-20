@@ -1,6 +1,7 @@
 "use client"
 
 import React from "react"
+import Image from "next/image"
 
 import { useState, useRef, useCallback } from "react"
 import { cn } from "../lib/utils"
@@ -226,10 +227,12 @@ export default function ImageUploader({
             {images.map((image) => (
               <div key={image.id} className="relative group">
                 <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={image.url || "/placeholder.svg"}
                     alt={image.file.name}
                     className="w-full h-full object-cover"
+                    width={120}
+                    height={120}
                   />
                 </div>
 

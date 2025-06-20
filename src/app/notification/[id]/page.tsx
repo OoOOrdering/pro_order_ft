@@ -14,7 +14,7 @@ export default function NotificationDetailPage() {
   useEffect(() => {
     if (!id) return;
     run(id).catch((err) => Toast.show({ type: 'error', message: error || '불러오기 실패' }));
-  }, [id]);
+  }, [id, error, run]);
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

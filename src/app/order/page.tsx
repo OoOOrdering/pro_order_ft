@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useAsync } from "@/hooks/useAsync";
 import Toast from "@/components/Toast";
 
-export default function OrderPage() {
+function OrderPage() {
   const { data: orders = [], isLoading: loading, error, refetch } = useQuery<Order[]>({
     queryKey: ["orders"],
     queryFn: async () => {
@@ -116,3 +116,5 @@ export default function OrderPage() {
     </>
   )
 }
+OrderPage.displayName = "OrderPage"
+export default OrderPage

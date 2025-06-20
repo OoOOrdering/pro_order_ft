@@ -4,6 +4,7 @@ import { useState } from "react"
 import { cn } from "../lib/utils"
 import Button from "./Button"
 import Card from "./Card"
+import Image from "next/image"
 
 interface ReviewDetailProps {
   review: {
@@ -74,10 +75,12 @@ export default function ReviewDetail({
         <div className="flex items-start space-x-4">
           <div className="flex-shrink-0">
             {review.author.profileImage ? (
-              <img
+              <Image
                 src={review.author.profileImage || "/placeholder.svg"}
                 alt={`${review.author.nickname}의 프로필`}
                 className="w-12 h-12 rounded-full object-cover"
+                width={48}
+                height={48}
               />
             ) : (
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
@@ -120,10 +123,12 @@ export default function ReviewDetail({
                   onClick={() => setSelectedImage(image)}
                   className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
                 >
-                  <img
+                  <Image
                     src={image || "/placeholder.svg"}
                     alt={`리뷰 이미지 ${index + 1}`}
                     className="w-full h-full object-cover"
+                    width={120}
+                    height={120}
                   />
                 </button>
               ))}

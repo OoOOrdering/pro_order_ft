@@ -4,11 +4,17 @@
 
 "use client"
 
+import Link from "next/link";
+
 export default function OrderList() {
   return (
     <div className="p-4 text-center">
       <p className="text-muted-foreground">
-        주문 목록은 <a href="/order" className="text-primary hover:underline">/order</a> 페이지에서 확인하세요.
+        주문 목록은{" "}
+        <Link href="/order" className="text-primary hover:underline">
+          /order
+        </Link>{" "}
+        페이지에서 확인하세요.
       </p>
     </div>
   );

@@ -8,6 +8,7 @@ import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
 import ChatImageUpload from "@/components/ChatImageUpload";
 import { connectSocket, onMessage } from "@/utils/socket";
+import Image from "next/image";
 
 export default function ChatRoomDetailPage() {
   const params = useParams();
@@ -131,7 +132,7 @@ export default function ChatRoomDetailPage() {
         {messages.map((msg, idx) => (
           <div key={msg.id || idx} className="mb-1">
             <span>{msg.content}</span>
-            {msg.image_url && <img src={msg.image_url} alt="첨부 이미지" className="max-w-xs mt-1" />}
+            {msg.image_url && <Image src={msg.image_url} alt="첨부 이미지" className="max-w-xs mt-1" width={320} height={240} />}
           </div>
         ))}
         {pendingMessages.map((msg) => (

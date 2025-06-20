@@ -18,7 +18,7 @@ export default function NoticeDetailPage() {
   useEffect(() => {
     if (!id) return;
     fetch(Number(id)).catch(() => Toast.show({ type: "error", message: error || "불러오기 실패" }));
-  }, [id]);
+  }, [id, error, fetch]);
 
   const handleDelete = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;

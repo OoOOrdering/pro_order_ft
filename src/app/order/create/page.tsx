@@ -73,7 +73,7 @@ export default function OrderCreatePage() {
 
   // 상품 정보 변경 시 합계 자동 계산
   const items = watch("items");
-  React.useEffect(() => { updateTotal(items); }, [items]);
+  React.useEffect(() => { updateTotal(items); }, [items, updateTotal]);
 
   const onSubmit = async (data: OrderCreate) => {
     await createOrderAsync(data);

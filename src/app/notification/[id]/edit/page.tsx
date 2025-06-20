@@ -19,7 +19,7 @@ export default function NotificationEditPage() {
     if (!notificationId) return;
     const id = Array.isArray(notificationId) ? notificationId[0] : notificationId;
     fetch(id).then((res) => setForm(res.data)).catch((err) => Toast.show({ type: 'error', message: error || '불러오기 실패' }));
-  }, [notificationId]);
+  }, [notificationId, error, fetch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

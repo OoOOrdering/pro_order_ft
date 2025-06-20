@@ -1,5 +1,6 @@
 "use client"
 import { cn } from "../lib/utils"
+import Image from "next/image"
 
 interface UserProfileCardProps {
   avatar?: string
@@ -22,10 +23,12 @@ export default function UserProfileCard({ avatar, nickname, email, className, on
         {/* Avatar */}
         <div className="relative">
           {avatar ? (
-            <img
+            <Image
               src={avatar || "/placeholder.svg"}
               alt={`${nickname}의 프로필`}
               className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
+              width={80}
+              height={80}
             />
           ) : (
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center border-4 border-white shadow-md">

@@ -17,7 +17,7 @@ export default function ProfileEditPage() {
 
   useEffect(() => {
     fetch().then((data) => setNickname(data.nickname));
-  }, []);
+  }, [fetch]);
   useEffect(() => { if (fetchError) Toast.show({ type: 'error', message: fetchError }); }, [fetchError]);
 
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

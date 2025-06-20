@@ -5,6 +5,7 @@ import api from '@/utils/axios';
 import Button from '@/components/Button';
 import ErrorMessage from '@/components/ErrorMessage';
 import Loading from '@/components/Loading';
+import Image from "next/image";
 
 export default function ImageDetailPage() {
   const params = useParams();
@@ -41,7 +42,7 @@ export default function ImageDetailPage() {
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">이미지 상세</h2>
-      <img src={image.url} alt="업로드 이미지" className="max-w-xs mb-4" />
+      <Image src={image.url} alt="업로드 이미지" className="max-w-xs mb-4" width={320} height={240} />
       <Button color="danger" onClick={handleDelete}>삭제</Button>
     </div>
   );

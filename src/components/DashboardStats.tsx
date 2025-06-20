@@ -1,15 +1,4 @@
-// 이 컴포넌트는 src/app/dashboard-summary/page.tsx와 중복되므로
-// 해당 페이지를 사용하는 것을 권장합니다.
-
-/*
-"use client"
-
-import { useEffect, useState } from "react"
-import Card from "./Card"
-
-// ... 기존 코드는 src/app/dashboard-summary/page.tsx에서 사용 중
-*/
-
+// 이 컴포넌트는 /dashboard-summary 페이지에서 통합 제공됩니다.
 export default function DashboardStats() {
   return (
     <div className="p-4 text-center">
@@ -21,5 +10,5 @@ export default function DashboardStats() {
         페이지에서 확인하세요.
       </p>
     </div>
-  )
+  );
 }

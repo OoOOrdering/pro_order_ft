@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function AccessibilitySample() {
   return (
     <form aria-label="접근성 샘플 폼">

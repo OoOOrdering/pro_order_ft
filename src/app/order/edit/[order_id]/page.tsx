@@ -7,6 +7,8 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
 
 const defaultItem = { product_name: "", quantity: 1, price: "0" };
 
@@ -27,6 +29,16 @@ export default function OrderEditPage() {
       .catch((err) => setError(err.response?.data?.detail || err.message))
       .finally(() => setLoading(false));
   }, [orderId]);
+
+  const { run: updateOrderAsync, loading: updating } = useAsync(async (id: number, form: Order) => updateOrder(id, form), {
+    onSuccess: () => {
+      Toast.show({ type: "success", message: "주문이 수정되었습니다!" });
+      setTimeout(() => router.push(`/order/${orderId}`), 1000);
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (!form) return;
@@ -56,22 +68,11 @@ export default function OrderEditPage() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
-    try {
-      if (!form) return;
-      const res = await updateOrder(Number(orderId), form);
-      setSuccess("주문이 수정되었습니다!");
-      setTimeout(() => router.push(`/order/${orderId}`), 1000);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
-    }
+    if (!form) return;
+    await updateOrderAsync(Number(orderId), form);
   };
 
-  if (loading || !form) return <Loading />;
+  if (updating || !form) return <Loading />;
 
   return (
     <div className="max-w-lg mx-auto p-6">

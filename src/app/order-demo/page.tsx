@@ -8,7 +8,7 @@ import FormBuilder from "../../components/FormBuilder"
 import MyPage from "../../components/MyPage"
 import ReviewDetail from "../../components/ReviewDetail"
 import AdminOrderView from "../../components/AdminOrderView"
-import OrderList from "../../components/OrderList"
+// import OrderList from "../../components/OrderList"
 import OrderTimeline from "../../components/OrderTimeline"
 import PageHeader from "../../components/PageHeader"
 import Card from "../../components/Card"
@@ -271,12 +271,12 @@ export default function OrderDemo() {
           </section>
         )}
 
-        {activeDemo === "list" && (
+        {/* {activeDemo === "list" && (
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-6">주문 목록</h2>
             <OrderList orders={sampleOrders} onOrderClick={handleOrderClick} />
           </section>
-        )}
+        )} */}
 
         {activeDemo === "timeline" && (
           <section>

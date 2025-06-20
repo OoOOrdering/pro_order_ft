@@ -244,6 +244,16 @@ export interface ReviewCreateUpdate {
   is_public?: boolean;
 }
 
+export interface Review {
+  id: number;
+  order: number;
+  comment?: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  is_public?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface NicknameCheck {
   nickname: string;
 }

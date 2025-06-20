@@ -5,6 +5,8 @@ import { getFaq, deleteFaq } from "@/api/swagger";
 import Button from "@/components/Button";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
 
 export default function FAQDetailPage() {
   const params = useParams();
@@ -13,7 +15,6 @@ export default function FAQDetailPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -24,19 +25,19 @@ export default function FAQDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const { run: deleteFaqAsync, loading: deleting } = useAsync(async (id: number) => deleteFaq(id), {
+    onSuccess: () => {
+      Toast.show({ type: "success", message: "삭제되었습니다." });
+      setTimeout(() => router.push("/faq"), 1000);
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
+
   const handleDelete = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
-    setLoading(true);
-    setError("");
-    try {
-      await deleteFaq(Number(id));
-      setSuccess("삭제되었습니다.");
-      setTimeout(() => router.push("/faq"), 1000);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
-    }
+    await deleteFaqAsync(Number(id));
   };
 
   if (loading) return <Loading />;
@@ -51,10 +52,9 @@ export default function FAQDetailPage() {
       <div className="mb-2 text-xs text-gray-400">작성일: {data.created_at?.slice(0, 10)}</div>
       <div className="flex gap-2 mt-4">
         <Button onClick={() => router.push(`/faq/${id}/edit`)} color="primary">수정</Button>
-        <Button onClick={handleDelete} color="danger">삭제</Button>
+        <Button onClick={handleDelete} color="danger" loading={deleting}>삭제</Button>
         <Button onClick={() => router.push("/faq")} color="default">목록</Button>
       </div>
-      {success && <div className="text-green-600 mt-2">{success}</div>}
     </div>
   );
 }

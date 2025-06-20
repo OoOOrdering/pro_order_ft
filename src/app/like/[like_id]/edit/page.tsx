@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getLike } from '@/api/swagger';
 import Button from '@/components/Button';
 import ErrorMessage from '@/components/ErrorMessage';
 
@@ -15,7 +14,7 @@ export default function LikeEditPage() {
 
   useEffect(() => {
     if (!likeId) return;
-    getLike(Number(likeId)).then(res => setForm(res.data)).catch(err => setError(err.response?.data?.detail || err.message));
+    // getLike(Number(likeId)).then(res => setForm(res.data)).catch(err => setError(err.response?.data?.detail || err.message));
   }, [likeId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

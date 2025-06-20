@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
-import type React from "react"
+import React from "react"
 
 interface PageTransitionProps {
   children: React.ReactNode

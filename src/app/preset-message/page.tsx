@@ -1,8 +1,8 @@
 "use client"
 import { useEffect, useState } from "react"
 import api from "@/utils/axios"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import Input from "@/components/Input"
+import Button from "@/components/Button"
 
 export default function PresetMessagePage() {
   const [list, setList] = useState<any[]>([])
@@ -22,7 +22,7 @@ export default function PresetMessagePage() {
     <div>
       <h2 className="text-xl font-bold mb-4">프리셋 메시지</h2>
       <div className="space-y-4 mb-6">
-        <Input placeholder="메시지 검색..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        <Input placeholder="메시지 검색..." value={searchTerm} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)} />
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
             <Button

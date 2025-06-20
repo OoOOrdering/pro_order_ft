@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState } from "react"
 import { cn } from "../lib/utils"
@@ -97,87 +97,90 @@ export default function FormBuilder({ onSave, className }: FormBuilderProps) {
     <Card
       key={field.id}
       className={cn("p-4 cursor-move", draggedIndex === index && "opacity-50")}
-      draggable
-      onDragStart={() => handleDragStart(index)}
-      onDragOver={(e) => handleDragOver(e, index)}
-      onDragEnd={handleDragEnd}
     >
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm font-medium text-primary">{getFieldTypeName(field.type)}</span>
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400 cursor-move">⋮⋮</span>
-          <Button variant="ghost" size="sm" onClick={() => removeField(index)} className="text-destructive">
-            ✕
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <Input
-          label="항목 제목"
-          value={field.label}
-          onChange={(e) => updateField(index, { label: e.target.value })}
-          placeholder="항목 제목을 입력하세요"
-        />
-
-        {field.type === "text" && (
-          <Input
-            label="플레이스홀더"
-            value={field.placeholder || ""}
-            onChange={(e) => updateField(index, { placeholder: e.target.value })}
-            placeholder="입력 안내 문구"
-          />
-        )}
-
-        {(field.type === "radio" || field.type === "checkbox") && (
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">선택 옵션</label>
-            {field.options?.map((option, optionIndex) => (
-              <div key={optionIndex} className="flex items-center space-x-2 mb-2">
-                <Input
-                  value={option}
-                  onChange={(e) => {
-                    const newOptions = [...(field.options || [])]
-                    newOptions[optionIndex] = e.target.value
-                    updateField(index, { options: newOptions })
-                  }}
-                  placeholder={`옵션 ${optionIndex + 1}`}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    const newOptions = field.options?.filter((_, i) => i !== optionIndex)
-                    updateField(index, { options: newOptions })
-                  }}
-                  className="text-destructive"
-                >
-                  ✕
-                </Button>
-              </div>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const newOptions = [...(field.options || []), `옵션 ${(field.options?.length || 0) + 1}`]
-                updateField(index, { options: newOptions })
-              }}
-            >
-              + 옵션 추가
+      <div
+        draggable
+        onDragStart={() => handleDragStart(index)}
+        onDragOver={(e) => handleDragOver(e, index)}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm font-medium text-primary">{getFieldTypeName(field.type)}</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-400 cursor-move">⋮⋮</span>
+            <Button variant="ghost" size="sm" onClick={() => removeField(index)} className="text-destructive">
+              ✕
             </Button>
           </div>
-        )}
+        </div>
 
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={field.required}
-            onChange={(e) => updateField(index, { required: e.target.checked })}
-            className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+        <div className="space-y-3">
+          <Input
+            label="항목 제목"
+            value={field.label}
+            onChange={(e) => updateField(index, { label: e.target.value })}
+            placeholder="항목 제목을 입력하세요"
           />
-          <span className="text-sm text-foreground">필수 항목</span>
-        </label>
+
+          {field.type === "text" && (
+            <Input
+              label="플레이스홀더"
+              value={field.placeholder || ""}
+              onChange={(e) => updateField(index, { placeholder: e.target.value })}
+              placeholder="입력 안내 문구"
+            />
+          )}
+
+          {(field.type === "radio" || field.type === "checkbox") && (
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">선택 옵션</label>
+              {field.options?.map((option, optionIndex) => (
+                <div key={optionIndex} className="flex items-center space-x-2 mb-2">
+                  <Input
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...(field.options || [])]
+                      newOptions[optionIndex] = e.target.value
+                      updateField(index, { options: newOptions })
+                    }}
+                    placeholder={`옵션 ${optionIndex + 1}`}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const newOptions = field.options?.filter((_, i) => i !== optionIndex)
+                      updateField(index, { options: newOptions })
+                    }}
+                    className="text-destructive"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newOptions = [...(field.options || []), `옵션 ${(field.options?.length || 0) + 1}`]
+                  updateField(index, { options: newOptions })
+                }}
+              >
+                + 옵션 추가
+              </Button>
+            </div>
+          )}
+
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={field.required}
+              onChange={(e) => updateField(index, { required: e.target.checked })}
+              className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+            />
+            <span className="text-sm text-foreground">필수 항목</span>
+          </label>
+        </div>
       </div>
     </Card>
   )

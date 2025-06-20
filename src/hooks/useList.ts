@@ -1,24 +1,21 @@
-import { useEffect, useState } from "react";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
-export function useList<T>(fetchList: () => Promise<T[]>) {
-  const [list, setList] = useState<T[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+export function useList<T>(
+  key: string | any[],
+  fetchList: () => Promise<T[]>,
+  options?: Omit<UseQueryOptions<T[], Error>, "queryKey" | "queryFn">,
+) {
+  const {
+    data: list = [],
+    error,
+    isLoading: loading,
+    refetch,
+    ...rest
+  } = useQuery<T[], Error>({
+    queryKey: Array.isArray(key) ? key : [key],
+    queryFn: fetchList,
+    ...options,
+  });
 
-  const fetch = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await fetchList();
-      setList(data);
-    } catch (err: any) {
-      setError(err.message || "데이터를 불러오지 못했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetch(); }, []);
-
-  return { list, setList, loading, error, fetch };
+  return { list, loading, error, refetch, ...rest };
 }

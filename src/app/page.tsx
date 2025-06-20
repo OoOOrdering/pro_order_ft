@@ -45,3 +45,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   )
 }
+
+// <List /> // renderItem 누락으로 주석 처리 또는 renderItem 추가 필요

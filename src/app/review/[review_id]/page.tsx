@@ -6,17 +6,37 @@ import Button from '@/components/Button';
 import ErrorMessage from '@/components/ErrorMessage';
 import Loading from '@/components/Loading';
 import Input from '@/components/Input';
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
+import type { Review } from '@/types/swagger';
 
 export default function ReviewDetailPage() {
   const params = useParams();
   const router = useRouter();
   const reviewId = params?.review_id;
-  const [review, setReview] = useState<any>(null);
+  const [review, setReview] = useState<Review | null>(null);
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(5);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
+
+  const { run: updateReviewAsync, loading: updating } = useAsync(async (id: string | string[], content: string, rating: number) => api.patch(`/reviews/${id}/`, { content, rating }), {
+    onSuccess: () => {
+      Toast.show({ type: "success", message: "리뷰가 수정되었습니다." });
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
+  const { run: deleteReviewAsync, loading: deleting } = useAsync(async (id: string | string[]) => api.delete(`/reviews/${id}/`), {
+    onSuccess: () => {
+      Toast.show({ type: "success", message: "삭제되었습니다." });
+      router.push('/review');
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
 
   useEffect(() => {
     if (!reviewId) return;
@@ -30,31 +50,12 @@ export default function ReviewDetailPage() {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
-    try {
-      await api.patch(`/reviews/${reviewId}/`, { content, rating });
-      setSuccess('리뷰가 수정되었습니다.');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
-    }
+    await updateReviewAsync(reviewId, content, rating);
   };
 
   const handleDelete = async () => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    setLoading(true);
-    try {
-      await api.delete(`/reviews/${reviewId}/`);
-      alert('삭제되었습니다.');
-      router.push('/review');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
-    }
+    await deleteReviewAsync(reviewId);
   };
 
   if (loading) return <Loading />;
@@ -70,7 +71,7 @@ export default function ReviewDetailPage() {
         <Button type="submit">수정</Button>
         <Button type="button" color="danger" onClick={handleDelete}>삭제</Button>
       </form>
-      {success && <div className="text-green-500 mt-2">{success}</div>}
+      {/* {success && <div className="text-green-500 mt-2">{success}</div>} */}
     </div>
   );
 }

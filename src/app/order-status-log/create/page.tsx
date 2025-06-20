@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { createOrderStatusLog } from '@/api/swagger';
+import { getOrderStatusLog } from '@/api/swagger';
 import Button from '@/components/Button';
 import ErrorMessage from '@/components/ErrorMessage';
 
@@ -18,7 +18,7 @@ export default function OrderStatusLogCreatePage() {
     setError('');
     setSuccess('');
     try {
-      await createOrderStatusLog(form);
+      await getOrderStatusLog(form);
       setSuccess('등록되었습니다.');
       setForm({});
     } catch (err: any) {

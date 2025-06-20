@@ -154,9 +154,12 @@ export default function MyPage({ isAdmin = false, className }: MyPageProps) {
             <Card
               key={index}
               className="p-4 cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={card.onClick}
             >
-              <div className="text-center space-y-3">
+              <div
+                onClick={card.onClick}
+                className="text-center space-y-3"
+                style={{ cursor: 'pointer' }}
+              >
                 <div className={cn("w-12 h-12 rounded-full mx-auto flex items-center justify-center", card.color)}>
                   <span className="text-2xl">{card.icon}</span>
                 </div>

@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { connectSocket, onNotification, disconnectSocket } from "../utils/socket";
+import { connectSocket, onMessage, disconnectSocket } from "../utils/socket";
 import Toast from "../components/Toast";
 
 export default function NotificationBadge() {
   useEffect(() => {
-    const socket = connectSocket();
-    onNotification((data) => {
+    const socket = connectSocket("notification");
+    onMessage((data) => {
       Toast.show({ message: data.message, type: "info" });
     });
     return () => disconnectSocket();

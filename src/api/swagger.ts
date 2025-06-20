@@ -19,6 +19,10 @@ export const changePassword = (data: T.PasswordChange) => axios.post('/users/pas
 export const passwordReset = (data: { email: string }) => axios.post('/users/password-reset/', data);
 export const resendVerificationEmail = (data: T.ResendVerificationEmail) => axios.post('/users/resend-verification-email/', data);
 export const verifyEmail = (data: T.EmailVerification) => axios.post('/users/verify-email/', data);
+// Token Info (JWT 토큰 정보 확인)
+export const getTokenInfo = () => axios.get<T.User>('/users/token/info/');
+// 이메일 인증 링크 확인(GET)
+export const verifyEmailLink = () => axios.get('/users/verify/email/');
 
 // Order 관련
 export const getOrderList = (params?: any) => axios.get<T.Order[]>('/orders/orders/', { params });
@@ -96,11 +100,11 @@ export const getPublishedFaqs = (params?: any) => axios.get('/faqs/faqs/publishe
 
 // CSPost
 export const getCSPostList = (params?: any) => axios.get('/cs-posts/', { params });
-export const getCSPost = (id: string) => axios.get(`/cs-posts/${id}/`);
+export const getCSPost = (id: number) => axios.get(`/cs-posts/${id}/`);
 export const createCSPost = (data: T.CSPostCreate) => axios.post('/cs-posts/', data);
-export const updateCSPost = (id: string, data: T.CSPostUpdate) => axios.put(`/cs-posts/${id}/`, data);
-export const partialUpdateCSPost = (id: string, data: Partial<T.CSPostUpdate>) => axios.patch(`/cs-posts/${id}/`, data);
-export const deleteCSPost = (id: string) => axios.delete(`/cs-posts/${id}/`);
+export const updateCSPost = (id: number, data: T.CSPostUpdate) => axios.put(`/cs-posts/${id}/`, data);
+export const partialUpdateCSPost = (id: number, data: Partial<T.CSPostUpdate>) => axios.patch(`/cs-posts/${id}/`, data);
+export const deleteCSPost = (id: number) => axios.delete(`/cs-posts/${id}/`);
 
 // CSReply
 export const getCSReplyList = (csPostPk: string, params?: any) => axios.get(`/cs-replies/cs-posts/${csPostPk}/replies/`, { params });

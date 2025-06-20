@@ -1,10 +1,10 @@
 "use client"
 import { useEffect, useState } from "react"
 import api from "@/utils/axios"
-import Card from "../components/Card"
-import PageHeader from "../components/PageHeader"
-import Loading from "../components/Loading"
-import ErrorMessage from "../components/ErrorMessage"
+import Card from "@/components/Card";
+import PageHeader from "@/components/PageHeader";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 interface DashboardData {
   total_orders: number

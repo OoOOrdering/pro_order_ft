@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useRef } from "react"
 import { cn } from "../lib/utils"
@@ -173,7 +173,9 @@ export default function OrderForm({ formData, onSubmit, isAdmin = false, onEditF
             </label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
               <input
-                ref={(el) => (fileInputRefs.current[field.id] = el)}
+                ref={(el) => {
+                  fileInputRefs.current[field.id] = el
+                }}
                 type="file"
                 accept="image/*"
                 multiple

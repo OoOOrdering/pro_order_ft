@@ -64,7 +64,7 @@ export default function FAQAccordion({ faqs, className }: FAQAccordionProps) {
         {categories.map((category) => (
           <button
             key={category}
-            onClick={() => setSelectedCategory(category)}
+            onClick={() => setSelectedCategory(category ?? null)}
             className={cn(
               "px-3 py-1 text-sm font-medium rounded-full transition-colors",
               selectedCategory === category

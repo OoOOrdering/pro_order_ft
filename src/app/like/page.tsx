@@ -4,7 +4,7 @@ import { getLikeList, deleteLike } from "@/api/swagger"
 import Button from "@/components/Button"
 import ErrorMessage from "@/components/ErrorMessage"
 import Loading from "@/components/Loading"
-import { Card } from "@/components/ui/card"
+import Card from "@/components/Card"
 import List from "@/components/List"
 import { useQuery } from "@tanstack/react-query"
 import { useList } from "../../hooks/useList"
@@ -38,7 +38,7 @@ export default function LikePage() {
           </Button>
         </div>
       </div>
-      {error && <ErrorMessage message={error} />}
+      {error && <ErrorMessage message={typeof error === 'string' ? error : error?.message || ''} />}
       {loading ? (
         <Loading />
       ) : (

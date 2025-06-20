@@ -1,13 +1,14 @@
 "use client"
 import { useState } from "react"
 import type React from "react"
-
 import api from "@/utils/axios"
 import { useRouter } from "next/navigation"
-import Card from "../../components/Card"
-import Button from "../../components/Button"
-import Input from "../../components/Input"
+import Card from "@/components/Card"
+import Button from "@/components/Button"
+import Input from "@/components/Input"
 import Link from "next/link"
+import { useAsync } from "@/hooks/useAsync"
+import Toast from "@/components/Toast"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -17,10 +18,16 @@ export default function RegisterPage() {
     nickname: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState("")
   const [nicknameLength, setNicknameLength] = useState(0)
   const router = useRouter()
+  const { loading, error, run } = useAsync(async (data: typeof formData) => {
+    return api.post("/users/register/", {
+      email: data.email,
+      password: data.password,
+      password_confirm: data.passwordConfirm,
+      nickname: data.nickname.trim(),
+    })
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -30,7 +37,6 @@ export default function RegisterPage() {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }))
     }
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }))
     }
@@ -38,57 +44,42 @@ export default function RegisterPage() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-
     if (!formData.email) {
       newErrors.email = "이메일을 입력해주세요"
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "올바른 이메일 형식이 아닙니다"
     }
-
     if (!formData.password) {
       newErrors.password = "비밀번호를 입력해주세요"
     } else if (formData.password.length < 8) {
       newErrors.password = "비밀번호는 8자 이상이어야 합니다"
     }
-
     if (formData.password !== formData.passwordConfirm) {
       newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다"
     }
-
     if (!formData.nickname) {
       newErrors.nickname = "닉네임을 입력해주세요"
     } else if (formData.nickname.trim().length > 10) {
       newErrors.nickname = "닉네임은 10자 이내로 입력해주세요"
     }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!validateForm()) return
-
-    setLoading(true)
     try {
-      await api.post("/users/register/", {
-        email: formData.email,
-        password: formData.password,
-        password_confirm: formData.passwordConfirm,
-        nickname: formData.nickname.trim(),
-      })
-      setSuccess("회원가입이 완료되었습니다! 이메일 인증을 확인해주세요.")
+      await run(formData)
+      Toast.show({ type: "success", message: "회원가입이 완료되었습니다! 이메일 인증을 확인해주세요." })
       setTimeout(() => router.push("/login"), 2000)
     } catch (err: any) {
-      const errorData = err.response?.data
+      const errorData = err?.response?.data
       if (typeof errorData === "object") {
         setErrors(errorData)
       } else {
-        setErrors({ general: errorData?.detail || "회원가입에 실패했습니다" })
+        Toast.show({ type: "error", message: error || "회원가입에 실패했습니다" })
       }
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -206,22 +197,6 @@ export default function RegisterPage() {
                     />
                   </svg>
                   <span className="text-sm text-red-700">{errors.general}</span>
-                </div>
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-sm text-green-700">{success}</span>
                 </div>
               </div>
             )}

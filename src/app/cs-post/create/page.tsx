@@ -7,6 +7,8 @@ import api from '@/utils/axios';
 import Button from '@/components/Button';
 import ErrorMessage from '@/components/ErrorMessage';
 import Input from '@/components/Input';
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
 
 const schema = yup.object().shape({
   title: yup.string().required("제목을 입력하세요."),
@@ -18,28 +20,25 @@ export default function CSPostCreatePage() {
     resolver: yupResolver(schema),
     defaultValues: { title: "", content: "" },
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [titleLength, setTitleLength] = useState(0);
   const [contentLength, setContentLength] = useState(0);
   const TITLE_MAX = 100;
   const CONTENT_MAX = 1000;
 
-  const onSubmit = async (data: { title: string; content: string }) => {
-    setError("");
-    setSuccess("");
-    try {
-      await api.post('/cs-posts/', {
-        title: data.title.trim(),
-        content: data.content.trim(),
-      });
-      setSuccess('등록되었습니다.');
+  const { run: createCSPostAsync, loading } = useAsync(async (data: { title: string; content: string }) => api.post('/cs-posts/', { title: data.title.trim(), content: data.content.trim() }), {
+    onSuccess: () => {
+      Toast.show({ type: "success", message: "등록되었습니다." });
       reset();
       setTitleLength(0);
       setContentLength(0);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    }
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
+
+  const onSubmit = async (data: { title: string; content: string }) => {
+    await createCSPostAsync(data);
   };
 
   return (
@@ -68,8 +67,8 @@ export default function CSPostCreatePage() {
         />
         <Button type="submit" disabled={isSubmitting}>등록</Button>
       </form>
-      <ErrorMessage message={error} />
-      {success && <div className="text-green-500 mt-2">{success}</div>}
+      {/* <ErrorMessage message={error} /> */}
+      {/* {success && <div className="text-green-500 mt-2">{success}</div>} */}
     </div>
   );
 }

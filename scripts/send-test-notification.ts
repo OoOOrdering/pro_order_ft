@@ -1,11 +1,11 @@
 #!/usr/bin/env ts-node
 // scripts/send-test-notification.ts
-import { connectSocket, onNotification, disconnectSocket } from '../src/utils/socket';
+import { connectSocket, onMessage, disconnectSocket } from '../src/utils/socket';
 
 console.log('🔔 실시간 알림 테스트 시작');
-const socket = connectSocket();
+const socket = connectSocket('test-room');
 
-onNotification((data) => {
+onMessage((data) => {
   console.log('알림 수신:', data);
   disconnectSocket();
   process.exit(0);

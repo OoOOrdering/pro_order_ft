@@ -15,7 +15,7 @@ export default function PresetMessageEditPage() {
 
   useEffect(() => {
     if (!presetId) return;
-    getPresetMessage(presetId).then(res => setForm(res.data)).catch(err => setError(err.response?.data?.detail || err.message));
+    getPresetMessage(Array.isArray(presetId) ? presetId[0] : presetId || '').then(res => setForm(res.data)).catch(err => setError(err.response?.data?.detail || err.message));
   }, [presetId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +27,7 @@ export default function PresetMessageEditPage() {
     setError('');
     setSuccess('');
     try {
-      await updatePresetMessage(presetId, form);
+      await updatePresetMessage(Array.isArray(presetId) ? presetId[0] : presetId || '', form);
       setSuccess('수정되었습니다.');
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message);

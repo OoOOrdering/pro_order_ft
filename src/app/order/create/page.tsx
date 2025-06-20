@@ -13,23 +13,26 @@ import Card from "@/components/Card"
 import PageHeader from "@/components/PageHeader"
 import Loading from "@/components/Loading"
 import ErrorMessage from "@/components/ErrorMessage"
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
 
-const defaultItem = { product_name: "", quantity: 1, price: "0" }
+const defaultItem: OrderItem = { product_name: "", quantity: 1, price: "0" };
 
-const schema = yup.object().shape({
+const schema: yup.Schema<OrderCreate> = yup.object({
   shipping_address: yup.string().required("주소를 입력하세요."),
   shipping_phone: yup.string().required("연락처를 입력하세요."),
   shipping_name: yup.string().required("수령인을 입력하세요."),
   shipping_memo: yup.string(),
   items: yup.array().of(
-    yup.object().shape({
+    yup.object({
       product_name: yup.string().required("상품명을 입력하세요."),
       quantity: yup.number().min(1, "수량은 1 이상이어야 합니다.").required("수량을 입력하세요.").typeError("수량은 숫자여야 합니다."),
-      price: yup.number().min(0, "가격은 0 이상이어야 합니다.").required("가격을 입력하세요.").typeError("가격은 숫자여야 합니다.")
-    })
-  ).min(1, "최소 1개 상품을 입력하세요."),
+      price: yup.string().required("가격을 입력하세요.").test("is-number", "가격은 숫자여야 합니다.", v => !isNaN(Number(v)))
+    }) as yup.Schema<OrderItem>
+  ).min(1, "최소 1개 상품을 입력하세요.").required(),
   payment_method: yup.string().required("결제수단을 선택하세요."),
+  payment_id: yup.string().notRequired().nullable(),
   total_amount: yup.string(),
 });
 
@@ -44,13 +47,24 @@ export default function OrderCreatePage() {
       payment_method: "카드",
       total_amount: "0",
     },
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const router = useRouter()
+  const router = useRouter();
+
+  // 주문 등록 useAsync 적용
+  const { run: createOrderAsync, loading: creating } = useAsync(createOrder, {
+    onSuccess: (res) => {
+      Toast.show({ type: "success", message: "주문이 생성되었습니다!" });
+      setTimeout(() => router.push(`/order/${res.data.id}`), 1500);
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
 
   const updateTotal = (items: OrderItem[]) => {
     const total = items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
@@ -62,21 +76,10 @@ export default function OrderCreatePage() {
   React.useEffect(() => { updateTotal(items); }, [items]);
 
   const onSubmit = async (data: OrderCreate) => {
-    setError("");
-    setSuccess("");
-    setLoading(true);
-    try {
-      const res = await createOrder(data);
-      setSuccess("주문이 생성되었습니다!");
-      setTimeout(() => router.push(`/order/${res.data.id}`), 1500);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+    await createOrderAsync(data);
+  };
 
-  if (loading) return <Loading text="주문을 생성하는 중..." />
+  if (creating) return <Loading text="주문을 생성하는 중..." />
 
   return (
     <div className="max-w-4xl mx-auto">

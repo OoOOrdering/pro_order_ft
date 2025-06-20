@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
 
 export default function FAQCreatePage() {
   const schema = yup.object().shape({
@@ -23,30 +25,31 @@ export default function FAQCreatePage() {
     resolver: yupResolver(schema),
     defaultValues: { question: "", answer: "" },
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [questionLength, setQuestionLength] = useState(0);
   const [answerLength, setAnswerLength] = useState(0);
   const QUESTION_MAX = 100;
   const ANSWER_MAX = 1000;
   const router = useRouter();
 
-  const onSubmit = async (data: { question: string; answer: string }) => {
-    setError("");
-    setSuccess("");
-    try {
-      const res = await createFaq({
-        question: data.question.trim(),
-        answer: data.answer.trim(),
-      });
-      setSuccess("등록되었습니다.");
-      setTimeout(() => router.push(`/faq/${res.data.id}`), 1000);
-      reset();
-      setQuestionLength(0);
-      setAnswerLength(0);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
+  const { run: createFaqAsync, loading } = useAsync(
+    async (data: { question: string; answer: string }) =>
+      createFaq({ question: data.question.trim(), answer: data.answer.trim() }),
+    {
+      onSuccess: res => {
+        Toast.show({ type: "success", message: "등록되었습니다." });
+        setTimeout(() => router.push(`/faq/${res.data.id}`), 1000);
+        reset();
+        setQuestionLength(0);
+        setAnswerLength(0);
+      },
+      onError: err => {
+        Toast.show({ type: "error", message: err?.message || "오류 발생" });
+      },
     }
+  );
+
+  const onSubmit = async (data: { question: string; answer: string }) => {
+    await createFaqAsync(data);
   };
 
   return (
@@ -81,8 +84,8 @@ export default function FAQCreatePage() {
           등록
         </Button>
       </form>
-      <ErrorMessage message={error} />
-      {success && <div className="text-green-500 mt-2">{success}</div>}
+      {/* <ErrorMessage message={error} /> */}
+      {/* {success && <div className="text-green-500 mt-2">{success}</div>} */}
     </div>
   );
 }

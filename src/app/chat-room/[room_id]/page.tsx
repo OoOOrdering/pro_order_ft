@@ -7,7 +7,7 @@ import Button from "@/components/Button";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
 import ChatImageUpload from "@/components/ChatImageUpload";
-import { connectSocket, onMessage, onTyping, sendTyping, sendRead, onRead } from "@/utils/socket";
+import { connectSocket, onMessage } from "@/utils/socket";
 
 export default function ChatRoomDetailPage() {
   const params = useParams();
@@ -58,22 +58,13 @@ export default function ChatRoomDetailPage() {
   }, [roomId]);
 
   useEffect(() => {
-    if (!roomId) return;
-    socketRef.current = connectSocket();
-    onMessage((msg) => {
-      setMessages((prev) => [...prev, msg]);
-      sendRead(roomId as string);
-    });
-    onTyping((data) => {
-      if (data.roomId === roomId) {
-        setOtherTyping(true);
-        setTimeout(() => setOtherTyping(false), 2000);
-      }
-    });
-    onRead((data) => {
-      // 읽음 처리 UI 필요시 구현
-    });
-    return () => { socketRef.current && socketRef.current.disconnect(); };
+    if (roomId) {
+      socketRef.current = connectSocket(String(roomId));
+      onMessage((msg) => {
+        setMessages((prev) => [...prev, msg]);
+      });
+      return () => { socketRef.current && socketRef.current.disconnect(); };
+    }
   }, [roomId]);
 
   const handleSend = async (e: React.FormEvent) => {
@@ -116,7 +107,7 @@ export default function ChatRoomDetailPage() {
     setLoading(true);
     setError("");
     try {
-      const data: ChatMessageCreate = { chat_room: Number(roomId), content: '', image_url: url };
+      const data: ChatMessageCreate = { chat_room: Number(roomId), content: '' };
       await createChatMessage(String(roomId), data);
       setSuccess("이미지 전송 완료");
       fetchMessages();
@@ -125,10 +116,6 @@ export default function ChatRoomDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleInput = () => {
-    sendTyping(roomId as string);
   };
 
   if (loading) return <Loading />;
@@ -160,7 +147,6 @@ export default function ChatRoomDetailPage() {
           type="text"
           value={content}
           onChange={e => setContent(e.target.value)}
-          onInput={handleInput}
           className="flex-1 border rounded px-2 py-1"
           placeholder="메시지 입력..."
           aria-label="메시지 입력"

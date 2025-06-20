@@ -1,18 +1,20 @@
 "use client"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { getOrderList, deleteOrder, exportOrdersCsv } from "@/api/swagger"
 import type { Order } from "@/types/swagger"
-import Button from "../components/Button"
-import Card from "../components/Card"
-import PageHeader from "../components/PageHeader"
-import Loading from "../components/Loading"
-import ErrorMessage from "../components/ErrorMessage"
+import Button from "@/components/Button";
+import Card from "@/components/Card";
+import PageHeader from "@/components/PageHeader";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage"
 import { useRouter } from "next/navigation"
 import Head from "next/head"
 import DownloadOrderExcel from "@/components/DownloadOrderExcel";
 import DownloadOrderPdf from "@/components/DownloadOrderPdf";
 import AccessibilitySample from "@/components/AccessibilitySample";
 import { useQuery } from "@tanstack/react-query"
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
 
 export default function OrderPage() {
   const { data: orders = [], isLoading: loading, error, refetch } = useQuery<Order[]>({
@@ -22,23 +24,22 @@ export default function OrderPage() {
       return data;
     },
   });
-  const [success, setSuccess] = useState("");
   const router = useRouter();
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
-    try {
-      await deleteOrder(id);
-      setSuccess("삭제되었습니다.");
+  // 삭제 액션 useAsync 적용
+  const { run: deleteOrderAsync, loading: deleting } = useAsync(deleteOrder, {
+    onSuccess: () => {
+      Toast.show({ type: "success", message: "삭제되었습니다." });
       refetch();
-    } catch (err: any) {
-      alert(err.response?.data?.detail || err.message);
-    }
-  };
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
 
-  const handleExport = async () => {
-    try {
-      const res = await exportOrdersCsv();
+  // 내보내기 액션 useAsync 적용
+  const { run: exportOrdersAsync } = useAsync(exportOrdersCsv, {
+    onSuccess: (res) => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -46,9 +47,20 @@ export default function OrderPage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err: any) {
-      alert(err.response?.data?.detail || err.message);
-    }
+      Toast.show({ type: "success", message: "CSV 내보내기 완료" });
+    },
+    onError: (err) => {
+      Toast.show({ type: "error", message: err?.message || "오류 발생" });
+    },
+  });
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+    await deleteOrderAsync(id);
+  };
+
+  const handleExport = async () => {
+    await exportOrdersAsync();
   };
 
   const getStatusColor = (status: string) => {
@@ -79,8 +91,7 @@ export default function OrderPage() {
       <main role="main" aria-label="주요 콘텐츠" className="px-2 sm:px-0 max-w-2xl mx-auto">
         <PageHeader title="주문 목록" />
         {loading && <Loading />}
-        {error && <ErrorMessage message={error} />}
-        {success && <div className="text-green-600" role="status">{success}</div>}
+        {error && <ErrorMessage message={typeof error === 'string' ? error : error?.message || ''} />}
         <Card>
           <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-4">
             <Button onClick={handleExport} aria-label="주문 내보내기(CSV)">CSV 내보내기</Button>
@@ -89,7 +100,7 @@ export default function OrderPage() {
           <ul className="divide-y" role="list" aria-label="주문 목록">
             {orders.map((order: Order, idx: number) => (
               <li key={order.id} className="py-2 flex flex-col sm:flex-row sm:items-center gap-2" tabIndex={0} aria-label={`주문 ${order.id}`}>
-                <span className="flex-1">{order.title}</span>
+                <span className="flex-1">{order.order_number}</span>
                 <DownloadOrderPdf order={order} />
                 <Button onClick={() => router.push(`/order/${order.id}`)} size="sm" variant="outline" aria-label="상세보기">상세</Button>
                 <Button onClick={() => router.push(`/order/edit/${order.id}`)} size="sm" variant="secondary" aria-label="수정">수정</Button>

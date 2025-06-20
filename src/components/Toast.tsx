@@ -118,3 +118,14 @@ export function useToast() {
     info,
   }
 }
+
+// default export: show 메서드 제공
+const Toast = {
+  show: (options: { type?: ToastType; title?: string; message: string; duration?: number }) => {
+    // 간단한 브라우저 alert 대체 (실제 앱에서는 전역 상태/컨텍스트로 연결 필요)
+    if (typeof window !== 'undefined') {
+      window.alert(options.message);
+    }
+  },
+};
+export default Toast;

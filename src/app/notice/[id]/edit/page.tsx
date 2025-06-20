@@ -3,58 +3,51 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getNotice, updateNotice, deleteNotice } from "@/api/swagger";
 import Button from "@/components/Button";
-import ErrorMessage from "@/components/ErrorMessage";
+import Toast from "@/components/Toast";
 import Loading from "@/components/Loading";
 import Input from "@/components/Input";
+import { useAsync } from "@/hooks/useAsync";
+import * as T from "@/types/swagger";
 
 export default function NoticeEditPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id;
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
+  const [form, setForm] = useState<Partial<T.NoticeCreateUpdate>>({});
+  const { loading, error, run: fetch } = useAsync(getNotice);
+  const { loading: updateLoading, run: update } = useAsync(updateNotice);
+  const { loading: deleteLoading, run: remove } = useAsync(deleteNotice);
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
-    getNotice(Number(id))
+    fetch(Number(id))
       .then((res) => {
-        setTitle(res.data.title);
-        setContent(res.data.content);
+        setForm(res.data);
       })
-      .catch((err) => setError(err.response?.data?.detail || err.message))
-      .finally(() => setLoading(false));
+      .catch(() =>
+        Toast.show({ type: "error", message: error || "불러오기 실패" })
+      );
   }, [id]);
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
     try {
-      await updateNotice(Number(id), { title, content });
-      setSuccess("수정되었습니다.");
+      await update(Number(id), { title: form.title, content: form.content });
+      Toast.show({ type: "success", message: "수정되었습니다." });
       setTimeout(() => router.push(`/notice/${id}`), 1000);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
+    } catch {
+      Toast.show({ type: "error", message: error || "수정에 실패했습니다." });
     }
   };
 
   const handleDelete = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
-    setLoading(true);
     try {
-      await deleteNotice(Number(id));
+      await remove(Number(id));
+      Toast.show({ type: "success", message: "삭제되었습니다." });
       router.push("/notice");
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
+    } catch {
+      Toast.show({ type: "error", message: error || "삭제에 실패했습니다." });
     }
   };
 
@@ -65,28 +58,32 @@ export default function NoticeEditPage() {
       <form onSubmit={handleEdit} className="space-y-2">
         <Input
           label="제목"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={form.title ?? ""}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, title: e.target.value }))
+          }
           required
         />
         <Input
           label="내용"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          value={form.content ?? ""}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, content: e.target.value }))
+          }
           required
         />
-        <Button type="submit">수정</Button>
+        <Button type="submit" disabled={updateLoading}>
+          {updateLoading ? "수정 중..." : "수정"}
+        </Button>
       </form>
       <div className="flex gap-2 mt-4">
-        <Button onClick={handleDelete} color="danger">
+        <Button onClick={handleDelete} color="danger" disabled={deleteLoading}>
           삭제
         </Button>
         <Button onClick={() => router.push(`/notice/${id}`)} color="default">
           상세
         </Button>
       </div>
-      <ErrorMessage message={error} />
-      {success && <div className="text-green-500 mt-2">{success}</div>}
     </div>
   );
 }

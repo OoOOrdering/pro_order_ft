@@ -12,8 +12,11 @@ export function useForm<T>({ initial, validate, onSubmit }: UseFormOptions<T>) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement & { checked?: boolean };
+    const checked = (e.target as HTMLInputElement).checked;
     setValues((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -23,7 +26,7 @@ export function useForm<T>({ initial, validate, onSubmit }: UseFormOptions<T>) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validate) {
       const newErrors = validate(values);
@@ -35,8 +38,8 @@ export function useForm<T>({ initial, validate, onSubmit }: UseFormOptions<T>) {
     try {
       await onSubmit(values);
       setSuccess("성공적으로 처리되었습니다.");
-    } catch (err: any) {
-      setErrors({ form: err.message });
+    } catch (err) {
+      setErrors({ form: (err as Error).message } as Partial<Record<keyof T, string>>);
     } finally {
       setLoading(false);
     }

@@ -2,19 +2,23 @@
 import { useEffect, useState } from 'react';
 import api from '@/utils/axios';
 import { useRouter } from 'next/navigation';
+import { useAsync } from '@/hooks/useAsync';
+import Toast from '@/components/Toast';
 
 export default function ProfileEditPage() {
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [nicknameMsg, setNicknameMsg] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [nicknameLength, setNicknameLength] = useState(0);
   const router = useRouter();
+  const { run: fetch, error: fetchError } = useAsync(async () => (await api.get('/users/profile/')).data);
+  const { loading: updateLoading, run: update } = useAsync(async (data: { nickname: string; password?: string }) => api.patch('/users/profile/', data));
+  const { loading: deleteLoading, run: remove } = useAsync(async () => api.delete('/users/profile/'));
 
   useEffect(() => {
-    api.get('/users/profile/').then(res => setNickname(res.data.nickname));
+    fetch().then((data) => setNickname(data.nickname));
   }, []);
+  useEffect(() => { if (fetchError) Toast.show({ type: 'error', message: fetchError }); }, [fetchError]);
 
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.slice(0, 10);
@@ -35,29 +39,27 @@ export default function ProfileEditPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     if (nickname.trim().length > 10) {
-      setError('닉네임은 10자 이내로 입력해주세요.');
+      Toast.show({ type: 'error', message: '닉네임은 10자 이내로 입력해주세요.' });
       return;
     }
     try {
-      await api.patch('/users/profile/', { nickname: nickname.trim(), password: password || undefined });
-      setSuccess('프로필이 수정되었습니다.');
+      await update({ nickname: nickname.trim(), password: password || undefined });
+      Toast.show({ type: 'success', message: '프로필이 수정되었습니다.' });
       setTimeout(() => router.push('/user/profile'), 1500);
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
+      Toast.show({ type: 'error', message: err?.response?.data?.detail || err?.message || '수정 실패' });
     }
   };
 
   const handleDelete = async () => {
     if (!confirm('정말 탈퇴하시겠습니까?')) return;
     try {
-      await api.delete('/users/profile/');
-      alert('탈퇴 처리되었습니다.');
+      await remove();
+      Toast.show({ type: 'success', message: '탈퇴 처리되었습니다.' });
       router.push('/');
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
+      Toast.show({ type: 'error', message: err?.response?.data?.detail || err?.message || '탈퇴 실패' });
     }
   };
 
@@ -69,11 +71,9 @@ export default function ProfileEditPage() {
         <div className="text-xs text-gray-500 mb-1">({nicknameLength}/10자)</div>
         {nicknameMsg && <div className="text-sm mb-2">{nicknameMsg}</div>}
         <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="새 비밀번호(선택)" className="border p-2 w-full" />
-        <button type="submit" className="bg-blue-500 text-white p-2 w-full rounded">수정</button>
+        <button type="submit" className="bg-blue-500 text-white p-2 w-full rounded" disabled={updateLoading}>{updateLoading ? '수정 중...' : '수정'}</button>
       </form>
-      <button onClick={handleDelete} className="bg-red-500 text-white p-2 w-full rounded mt-4">탈퇴(비활성화)</button>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-      {success && <p className="text-green-500 mt-2">{success}</p>}
+      <button onClick={handleDelete} className="bg-red-500 text-white p-2 w-full rounded mt-4" disabled={deleteLoading}>탈퇴(비활성화)</button>
     </div>
   );
 }

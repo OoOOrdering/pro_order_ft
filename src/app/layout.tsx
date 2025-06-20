@@ -2,16 +2,17 @@ import type React from "react"
 import type { Metadata } from "next"
 import RootLayout from "./page"
 import Head from "next/head"
-import { appWithTranslation } from "react-i18next";
 import "../i18n/config";
 import { ThemeProvider } from "next-themes";
 import NotificationBadge from "@/components/NotificationBadge";
 import NotificationSettings from "@/components/NotificationSettings";
-import ThemeToggle from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import OnboardingGuide from "@/components/OnboardingGuide";
 import ReactQueryProvider from "../providers/ReactQueryProvider"
 import { useEffect, useState } from "react";
 import { getProfile } from "@/api/swagger";
+import { DefaultSeo } from 'next-seo';
+import SEO from '../../next-seo.config';
 
 export const metadata: Metadata = {
   title: "PR Order",
@@ -33,6 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="ko_KR" />
       </Head>
+      <DefaultSeo {...SEO} />
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReactQueryProvider>

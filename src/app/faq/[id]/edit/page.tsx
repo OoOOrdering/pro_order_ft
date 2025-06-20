@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getFaq, updateFaq, deleteFaq } from "@/api/swagger";
 import Button from "@/components/Button";
-import ErrorMessage from "@/components/ErrorMessage";
 import Loading from "@/components/Loading";
 import Input from "@/components/Input";
+import { useAsync } from "@/hooks/useAsync";
+import Toast from "@/components/Toast";
 
 export default function FAQEditPage() {
   const params = useParams();
@@ -13,9 +14,33 @@ export default function FAQEditPage() {
   const id = params?.id;
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
+
+  const { run: updateFaqAsync, loading: updating } = useAsync(
+    async (id: number, question: string, answer: string) =>
+      updateFaq(id, { question, answer }),
+    {
+      onSuccess: () => {
+        Toast.show({ type: "success", message: "수정되었습니다." });
+        setTimeout(() => router.push(`/faq/${id}`), 1000);
+      },
+      onError: (err) => {
+        Toast.show({ type: "error", message: err?.message || "오류 발생" });
+      },
+    }
+  );
+  const { run: deleteFaqAsync, loading: deleting } = useAsync(
+    async (id: number) => deleteFaq(id),
+    {
+      onSuccess: () => {
+        Toast.show({ type: "success", message: "삭제되었습니다." });
+        router.push("/faq");
+      },
+      onError: (err) => {
+        Toast.show({ type: "error", message: err?.message || "오류 발생" });
+      },
+    }
+  );
 
   useEffect(() => {
     if (!id) return;
@@ -25,37 +50,17 @@ export default function FAQEditPage() {
         setQuestion(res.data.question);
         setAnswer(res.data.answer);
       })
-      .catch((err) => setError(err.response?.data?.detail || err.message))
+      .catch((err) => Toast.show({ type: "error", message: err.message }))
       .finally(() => setLoading(false));
   }, [id]);
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
-    try {
-      await updateFaq(Number(id), { question, answer });
-      setSuccess("수정되었습니다.");
-      setTimeout(() => router.push(`/faq/${id}`), 1000);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
-    }
+    await updateFaqAsync(Number(id), question, answer);
   };
-
   const handleDelete = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
-    setLoading(true);
-    try {
-      await deleteFaq(Number(id));
-      router.push("/faq");
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      setLoading(false);
-    }
+    await deleteFaqAsync(Number(id));
   };
 
   if (loading) return <Loading />;
@@ -85,8 +90,8 @@ export default function FAQEditPage() {
           상세
         </Button>
       </div>
-      <ErrorMessage message={error} />
-      {success && <div className="text-green-500 mt-2">{success}</div>}
+      {/* <ErrorMessage message={error} /> */}
+      {/* {success && <div className="text-green-600 mt-2">{success}</div>} */}
     </div>
   );
 }

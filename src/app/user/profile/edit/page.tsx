@@ -9,19 +9,27 @@ export default function ProfileEditPage() {
   const [nicknameMsg, setNicknameMsg] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [nicknameLength, setNicknameLength] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
     api.get('/users/profile/').then(res => setNickname(res.data.nickname));
   }, []);
 
+  const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.slice(0, 10);
+    setNickname(value);
+    setNicknameLength(value.trim().length);
+    setNicknameMsg("");
+  };
+
   const checkNickname = async () => {
-    if (!nickname) return;
+    if (!nickname.trim()) return;
     try {
-      await api.post('/users/check-nickname/', { nickname });
+      await api.post('/users/check-nickname/', { nickname: nickname.trim() });
       setNicknameMsg('사용 가능한 닉네임입니다.');
     } catch (err: any) {
-      setNicknameMsg('이미 사용 중인 닉네임입니다.');
+      setNicknameMsg(err.response?.data?.detail || '이미 사용 중인 닉네임입니다.');
     }
   };
 
@@ -29,8 +37,12 @@ export default function ProfileEditPage() {
     e.preventDefault();
     setError('');
     setSuccess('');
+    if (nickname.trim().length > 10) {
+      setError('닉네임은 10자 이내로 입력해주세요.');
+      return;
+    }
     try {
-      await api.patch('/users/profile/', { nickname, password: password || undefined });
+      await api.patch('/users/profile/', { nickname: nickname.trim(), password: password || undefined });
       setSuccess('프로필이 수정되었습니다.');
       setTimeout(() => router.push('/user/profile'), 1500);
     } catch (err: any) {
@@ -53,7 +65,8 @@ export default function ProfileEditPage() {
     <div>
       <h2 className="text-xl font-bold mb-4">프로필 수정</h2>
       <form onSubmit={handleSubmit} className="space-y-2">
-        <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} onBlur={checkNickname} placeholder="닉네임" className="border p-2 w-full" />
+        <input type="text" value={nickname} onChange={handleNicknameChange} onBlur={checkNickname} placeholder="닉네임" className="border p-2 w-full" maxLength={10} />
+        <div className="text-xs text-gray-500 mb-1">({nicknameLength}/10자)</div>
         {nicknameMsg && <div className="text-sm mb-2">{nicknameMsg}</div>}
         <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="새 비밀번호(선택)" className="border p-2 w-full" />
         <button type="submit" className="bg-blue-500 text-white p-2 w-full rounded">수정</button>

@@ -20,14 +20,23 @@ export default function CSPostCreatePage() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [titleLength, setTitleLength] = useState(0);
+  const [contentLength, setContentLength] = useState(0);
+  const TITLE_MAX = 100;
+  const CONTENT_MAX = 1000;
 
   const onSubmit = async (data: { title: string; content: string }) => {
     setError("");
     setSuccess("");
     try {
-      await api.post('/cs-posts/', data);
+      await api.post('/cs-posts/', {
+        title: data.title.trim(),
+        content: data.content.trim(),
+      });
       setSuccess('등록되었습니다.');
       reset();
+      setTitleLength(0);
+      setContentLength(0);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message);
     }
@@ -40,10 +49,22 @@ export default function CSPostCreatePage() {
         <Input label="제목" {...register("title")}
           error={errors.title?.message}
           required
+          maxLength={TITLE_MAX}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            register("title").onChange(e);
+            setTitleLength(e.target.value.trim().length);
+          }}
+          helperText={`(${titleLength}/${TITLE_MAX}자)`}
         />
         <Input label="내용" {...register("content")}
           error={errors.content?.message}
           required
+          maxLength={CONTENT_MAX}
+          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            register("content").onChange(e);
+            setContentLength(e.target.value.trim().length);
+          }}
+          helperText={`(${contentLength}/${CONTENT_MAX}자)`}
         />
         <Button type="submit" disabled={isSubmitting}>등록</Button>
       </form>

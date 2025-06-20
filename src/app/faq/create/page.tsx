@@ -25,16 +25,25 @@ export default function FAQCreatePage() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [questionLength, setQuestionLength] = useState(0);
+  const [answerLength, setAnswerLength] = useState(0);
+  const QUESTION_MAX = 100;
+  const ANSWER_MAX = 1000;
   const router = useRouter();
 
   const onSubmit = async (data: { question: string; answer: string }) => {
     setError("");
     setSuccess("");
     try {
-      const res = await createFaq(data);
+      const res = await createFaq({
+        question: data.question.trim(),
+        answer: data.answer.trim(),
+      });
       setSuccess("등록되었습니다.");
       setTimeout(() => router.push(`/faq/${res.data.id}`), 1000);
       reset();
+      setQuestionLength(0);
+      setAnswerLength(0);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message);
     }
@@ -49,12 +58,24 @@ export default function FAQCreatePage() {
           {...register("question")}
           error={errors.question?.message}
           required
+          maxLength={QUESTION_MAX}
+          onChange={e => {
+            register("question").onChange(e);
+            setQuestionLength(e.target.value.trim().length);
+          }}
+          helperText={`(${questionLength}/${QUESTION_MAX}자)`}
         />
         <Input
           label="답변"
           {...register("answer")}
           error={errors.answer?.message}
           required
+          maxLength={ANSWER_MAX}
+          onChange={e => {
+            register("answer").onChange(e);
+            setAnswerLength(e.target.value.trim().length);
+          }}
+          helperText={`(${answerLength}/${ANSWER_MAX}자)`}
         />
         <Button type="submit" disabled={isSubmitting}>
           등록

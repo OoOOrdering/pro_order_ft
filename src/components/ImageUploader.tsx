@@ -29,6 +29,8 @@ export default function ImageUploader({
   const [images, setImages] = useState<ImageFile[]>([])
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState("")
+  const [uploading, setUploading] = useState(false)
+  const [uploadedUrl, setUploadedUrl] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFiles = useCallback(
@@ -126,6 +128,32 @@ export default function ImageUploader({
     [handleFiles],
   )
 
+  const handleUpload = async () => {
+    if (images.length === 0) {
+      setError("업로드할 이미지를 선택하세요.")
+      return
+    }
+    setUploading(true)
+    setError("")
+    setUploadedUrl("")
+    try {
+      const formData = new FormData()
+      formData.append("image", images[0].file)
+      const response = await fetch("/api/upload/", {
+        method: "POST",
+        body: formData,
+        // 필요시 인증 헤더 추가
+      })
+      if (!response.ok) throw new Error("업로드 실패: " + response.statusText)
+      const result = await response.json()
+      setUploadedUrl(result.image_url)
+    } catch (err: any) {
+      setError(err.message || "업로드 중 오류가 발생했습니다.")
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes"
     const k = 1024
@@ -221,6 +249,33 @@ export default function ImageUploader({
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 업로드 버튼 및 결과 안내 */}
+      {images.length > 0 && (
+        <div className="mt-4 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleUpload}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            disabled={uploading}
+          >
+            {uploading ? "업로드 중..." : "이미지 업로드"}
+          </button>
+          {uploadedUrl && (
+            <div className="text-green-600 text-sm break-all">
+              업로드 성공! URL:{" "}
+              <a
+                href={uploadedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                {uploadedUrl}
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>

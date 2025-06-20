@@ -15,16 +15,21 @@ export default function RegisterPage() {
     password: "",
     passwordConfirm: "",
     nickname: "",
-    name: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState("")
+  const [nicknameLength, setNicknameLength] = useState(0)
   const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (name === "nickname") {
+      setNicknameLength(value.trim().length)
+      setFormData((prev) => ({ ...prev, [name]: value.slice(0, 10) }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }))
@@ -52,10 +57,8 @@ export default function RegisterPage() {
 
     if (!formData.nickname) {
       newErrors.nickname = "닉네임을 입력해주세요"
-    }
-
-    if (!formData.name) {
-      newErrors.name = "이름을 입력해주세요"
+    } else if (formData.nickname.trim().length > 10) {
+      newErrors.nickname = "닉네임은 10자 이내로 입력해주세요"
     }
 
     setErrors(newErrors)
@@ -73,8 +76,7 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
         password_confirm: formData.passwordConfirm,
-        nickname: formData.nickname,
-        name: formData.name,
+        nickname: formData.nickname.trim(),
       })
       setSuccess("회원가입이 완료되었습니다! 이메일 인증을 확인해주세요.")
       setTimeout(() => router.push("/login"), 2000)
@@ -127,27 +129,6 @@ export default function RegisterPage() {
             />
 
             <Input
-              label="이름"
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="실명을 입력하세요"
-              error={errors.name}
-              required
-              leftIcon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              }
-            />
-
-            <Input
               label="닉네임"
               type="text"
               name="nickname"
@@ -156,6 +137,7 @@ export default function RegisterPage() {
               placeholder="닉네임을 입력하세요"
               error={errors.nickname}
               required
+              maxLength={10}
               leftIcon={
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -166,6 +148,7 @@ export default function RegisterPage() {
                   />
                 </svg>
               }
+              helperText={`(${nicknameLength}/10자)`}
             />
 
             <Input

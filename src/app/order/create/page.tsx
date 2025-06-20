@@ -19,7 +19,7 @@ import Toast from "@/components/Toast";
 
 const defaultItem: OrderItem = { product_name: "", quantity: 1, price: "0" };
 
-const schema: yup.Schema<OrderCreate> = yup.object({
+const schema = yup.object({
   shipping_address: yup.string().required("주소를 입력하세요."),
   shipping_phone: yup.string().required("연락처를 입력하세요."),
   shipping_name: yup.string().required("수령인을 입력하세요."),
@@ -34,7 +34,7 @@ const schema: yup.Schema<OrderCreate> = yup.object({
   payment_method: yup.string().required("결제수단을 선택하세요."),
   payment_id: yup.string().notRequired().nullable(),
   total_amount: yup.string(),
-});
+}) as yup.ObjectSchema<OrderCreate>;
 
 export default function OrderCreatePage() {
   const { register, control, handleSubmit, formState: { errors, isSubmitting }, setValue, watch } = useForm<OrderCreate>({

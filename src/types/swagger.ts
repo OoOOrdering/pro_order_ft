@@ -172,7 +172,7 @@ export interface OrderCreate {
   shipping_memo?: string;
   items: OrderItem[];
   payment_method: string;
-  payment_id?: string;
+  payment_id?: string | null;
   total_amount: string;
 }
 

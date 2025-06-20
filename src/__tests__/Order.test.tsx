@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -20,6 +21,7 @@ describe('OrderPage', () => {
       </QueryClientProvider>
     );
     await waitFor(() => {
+      // @ts-expect-error
       expect(screen.getByText('주문 목록')).toBeInTheDocument();
     });
   });

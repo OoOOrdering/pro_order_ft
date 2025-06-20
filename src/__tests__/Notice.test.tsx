@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -13,6 +14,7 @@ describe('NoticePage', () => {
       </QueryClientProvider>
     );
     await waitFor(() => {
+      // @ts-expect-error
       expect(screen.getByText('공지사항')).toBeInTheDocument();
     });
   });

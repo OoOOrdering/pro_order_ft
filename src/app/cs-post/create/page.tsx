@@ -54,6 +54,7 @@ export default function CSPostCreatePage() {
             setTitleLength(e.target.value.trim().length);
           }}
           helperText={`(${titleLength}/${TITLE_MAX}자)`}
+
         />
         <Input label="내용" {...register("content")}
           error={errors.content?.message}
@@ -64,6 +65,7 @@ export default function CSPostCreatePage() {
             setContentLength(e.target.value.trim().length);
           }}
           helperText={`(${contentLength}/${CONTENT_MAX}자)`}
+
         />
         <Button type="submit" disabled={isSubmitting}>등록</Button>
       </form>

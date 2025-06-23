@@ -1,3 +1,5 @@
+"use client";
+
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getToken, getRefreshToken, setToken, setRefreshToken, removeToken, removeRefreshToken, logout } from './token';
 

@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "../components/ThemeProvider"
@@ -8,38 +6,27 @@ import { Footer } from "../components/Footer"
 import { MobileNav } from "../components/MobileNav"
 import AnimatedLayout from "../components/AnimatedLayout"
 import "./globals.css"
-import { ToastContainer, useToast } from "../components/Toast"
+import ClientRoot from "./ClientRoot"
 
 const inter = Inter({ subsets: ["latin"] })
 
-function ToastProvider({ children }: { children: React.ReactNode }) {
-  const { toasts, removeToast } = useToast()
-
-  return (
-    <>
-      {children}
-      <ToastContainer toasts={toasts} onClose={removeToast} />
-    </>
-  )
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function Page() {
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider defaultTheme="system" storageKey="pr-order-theme">
-          <ToastProvider>
+          <ClientRoot>
             <div className="min-h-screen flex flex-col">
               <Header />
               <main className="flex-1 pb-16 md:pb-0">
                 <AnimatedLayout>
-                  <div className="container mx-auto px-4 py-6">{children}</div>
+                  <div className="container mx-auto px-4 py-6">메인 페이지</div>
                 </AnimatedLayout>
               </main>
               <Footer />
               <MobileNav />
             </div>
-          </ToastProvider>
+          </ClientRoot>
         </ThemeProvider>
       </body>
     </html>

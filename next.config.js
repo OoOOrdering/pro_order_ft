@@ -1,5 +1,9 @@
 // next.config.js
 module.exports = {
+  experimental: {
+    clientTraceMetadata: false,
+    // 필요한 경우 다른 실험 옵션도 false로 명시
+  },
   async headers() {
     return [
       {

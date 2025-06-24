@@ -30,7 +30,12 @@ export default function NotificationPage() {
     Toast.show({ type: "success", message: "삭제되었습니다." });
     refetch();
   });
-  useEffect(() => { if (error) Toast.show({ type: "error", message: error.message }); }, [error]);
+  useEffect(() => {
+    if (error) {
+      const err: any = error;
+      Toast.show({ type: "error", message: typeof err === "string" ? err : err?.message ? err.message : JSON.stringify(err) });
+    }
+  }, [error]);
 
   return (
     <div className="max-w-lg mx-auto p-6">

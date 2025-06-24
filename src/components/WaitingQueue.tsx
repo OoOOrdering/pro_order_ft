@@ -3,13 +3,23 @@
 import { useState, useEffect } from "react"
 import { cn } from "../lib/utils"
 import Card from "./Card"
+import { safeRender } from "@/lib/safeRender"
+import TextRenderer from "@/lib/safeTextRender"
 
 interface WaitingQueueProps {
-  orderId: number
-  currentPosition: number
-  totalWaiting: number
-  estimatedTime?: string
+  orderId: any // number에서 any로 변경하여 방어
+  currentPosition: any
+  totalWaiting: any
+  estimatedTime?: any
   className?: string
+}
+
+function safeRenderValue(value: any) {
+  if (typeof window !== "undefined" && (window as any).React && (window as any).React.isValidElement) {
+    if ((window as any).React.isValidElement(value)) return value
+  }
+  if (typeof value === "object" && value !== null) return JSON.stringify(value)
+  return String(value)
 }
 
 export default function WaitingQueue({
@@ -19,6 +29,11 @@ export default function WaitingQueue({
   estimatedTime,
   className,
 }: WaitingQueueProps) {
+  console.log('WaitingQueue:orderId', typeof orderId, orderId)
+  console.log('WaitingQueue:currentPosition', typeof currentPosition, currentPosition)
+  console.log('WaitingQueue:totalWaiting', typeof totalWaiting, totalWaiting)
+  console.log('WaitingQueue:estimatedTime', typeof estimatedTime, estimatedTime)
+
   const [position, setPosition] = useState(currentPosition)
   const [isUpdating, setIsUpdating] = useState(false)
 
@@ -56,7 +71,7 @@ export default function WaitingQueue({
         {/* 헤더 */}
         <div className="text-center mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-2">주문 대기 순번</h3>
-          <p className="text-sm text-muted-foreground">주문번호: #{orderId}</p>
+          <p className="text-sm text-muted-foreground">주문번호: #<TextRenderer value={orderId} context="WaitingQueue.orderId" /></p>
         </div>
 
         {/* 메인 순번 표시 */}
@@ -68,27 +83,27 @@ export default function WaitingQueue({
               isUpdating && "scale-110 animate-pulse",
             )}
           >
-            {position}
+            <TextRenderer value={position} context="WaitingQueue.position" />
           </div>
-          <p className="text-xl font-semibold text-foreground mt-4">{getPositionText(position)}</p>
+          <p className="text-xl font-semibold text-foreground mt-4"><TextRenderer value={getPositionText(position)} context="WaitingQueue.positionText" /></p>
         </div>
 
         {/* 상세 정보 */}
         <div className="space-y-4">
           <div className="flex justify-between items-center p-3 bg-background/50 rounded-lg">
             <span className="text-sm text-muted-foreground">현재 순번</span>
-            <span className="font-semibold text-foreground">{position}번째</span>
+            <span className="font-semibold text-foreground"><TextRenderer value={position} context="WaitingQueue.position" />번째</span>
           </div>
 
           <div className="flex justify-between items-center p-3 bg-background/50 rounded-lg">
             <span className="text-sm text-muted-foreground">전체 대기</span>
-            <span className="font-semibold text-foreground">{totalWaiting}명</span>
+            <span className="font-semibold text-foreground"><TextRenderer value={totalWaiting} context="WaitingQueue.totalWaiting" />명</span>
           </div>
 
           {estimatedTime && (
             <div className="flex justify-between items-center p-3 bg-background/50 rounded-lg">
               <span className="text-sm text-muted-foreground">예상 시간</span>
-              <span className="font-semibold text-foreground">{estimatedTime}</span>
+              <span className="font-semibold text-foreground"><TextRenderer value={estimatedTime} context="WaitingQueue.estimatedTime" /></span>
             </div>
           )}
         </div>

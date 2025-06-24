@@ -14,7 +14,12 @@ export default function ProfilePage() {
   const { result, loading, error, run } = useAsync(async () => (await api.get<UserProfile>('/users/profile/')).data);
 
   useEffect(() => { run(); }, [run]);
-  useEffect(() => { if (error) Toast.show({ type: 'error', message: error }); }, [error]);
+  useEffect(() => {
+    if (error) {
+      const err: any = error;
+      Toast.show({ type: 'error', message: typeof err === 'string' ? err : err?.message ? err.message : JSON.stringify(err) });
+    }
+  }, [error]);
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return null;

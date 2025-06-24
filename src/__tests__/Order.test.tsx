@@ -9,7 +9,7 @@ jest.mock('../components/DownloadOrderPdf', () => {
 });
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock('../api/swagger', () => ({ getOrderList: jest.fn(() => Promise.resolve({ data: [] })) }));
-import OrderPage from '../app/order/page';
+import OrderPage from '../src/app/order/page';
 
 OrderPage.displayName = "OrderPage"
 

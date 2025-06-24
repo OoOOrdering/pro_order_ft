@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { cn } from "../lib/utils"
 
 export type ToastType = "success" | "error" | "warning" | "info"
@@ -51,8 +51,8 @@ function ToastItem({ toast, onClose }: ToastProps) {
     >
       <span className="text-xl flex-shrink-0">{toastIcons[toast.type]}</span>
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium">{toast.title}</h4>
-        {toast.message && <p className="text-sm mt-1 opacity-90">{toast.message}</p>}
+        <h4 className="font-medium">{typeof toast.title === 'string' ? toast.title : JSON.stringify(toast.title)}</h4>
+        {toast.message && <p className="text-sm mt-1 opacity-90">{typeof toast.message === 'string' ? toast.message : JSON.stringify(toast.message)}</p>}
       </div>
       <button
         onClick={() => onClose(toast.id)}
@@ -84,29 +84,108 @@ export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([])
 
   const addToast = (toast: Omit<Toast, "id">) => {
+    // title, message에 객체가 들어오면 문자열로 변환 또는 오류 메시지로 대체
+    let safeTitle: string = ""
+    let safeMessage: string | undefined = undefined
+    if (typeof toast.title === "string") {
+      safeTitle = toast.title
+    } else if (toast.title !== undefined) {
+      safeTitle = typeof toast.title === "object" ? JSON.stringify(toast.title) : String(toast.title)
+    } else {
+      safeTitle = "오류 발생"
+    }
+    if (toast.message !== undefined) {
+      if (typeof toast.message === "string") {
+        safeMessage = toast.message
+      } else if (typeof toast.message === "object") {
+        safeMessage = JSON.stringify(toast.message)
+      } else {
+        safeMessage = String(toast.message)
+      }
+    }
     const id = Date.now().toString()
-    setToasts((prev) => [...prev, { ...toast, id }])
+    setToasts((prev) => [...prev, { ...toast, id, title: safeTitle, message: safeMessage }])
   }
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id))
   }
 
-  const success = (title: string, message?: string) => {
-    addToast({ type: "success", title, message })
-  }
+  const success = (title: string | React.ReactNode, message?: string | React.ReactNode) => {
+    addToast({
+      type: "success",
+      title: React.isValidElement(title)
+        ? JSON.stringify(title)
+        : typeof title === "object"
+        ? JSON.stringify(title)
+        : String(title),
+      message:
+        message === undefined
+          ? undefined
+          : React.isValidElement(message)
+          ? JSON.stringify(message)
+          : typeof message === "object"
+          ? JSON.stringify(message)
+          : String(message),
+    });
+  };
 
-  const error = (title: string, message?: string) => {
-    addToast({ type: "error", title, message })
-  }
+  const error = (title: string | React.ReactNode, message?: string | React.ReactNode) => {
+    addToast({
+      type: "error",
+      title: React.isValidElement(title)
+        ? JSON.stringify(title)
+        : typeof title === "object"
+        ? JSON.stringify(title)
+        : String(title),
+      message:
+        message === undefined
+          ? undefined
+          : React.isValidElement(message)
+          ? JSON.stringify(message)
+          : typeof message === "object"
+          ? JSON.stringify(message)
+          : String(message),
+    });
+  };
 
-  const warning = (title: string, message?: string) => {
-    addToast({ type: "warning", title, message })
-  }
+  const warning = (title: string | React.ReactNode, message?: string | React.ReactNode) => {
+    addToast({
+      type: "warning",
+      title: React.isValidElement(title)
+        ? JSON.stringify(title)
+        : typeof title === "object"
+        ? JSON.stringify(title)
+        : String(title),
+      message:
+        message === undefined
+          ? undefined
+          : React.isValidElement(message)
+          ? JSON.stringify(message)
+          : typeof message === "object"
+          ? JSON.stringify(message)
+          : String(message),
+    });
+  };
 
-  const info = (title: string, message?: string) => {
-    addToast({ type: "info", title, message })
-  }
+  const info = (title: string | React.ReactNode, message?: string | React.ReactNode) => {
+    addToast({
+      type: "info",
+      title: React.isValidElement(title)
+        ? JSON.stringify(title)
+        : typeof title === "object"
+        ? JSON.stringify(title)
+        : String(title),
+      message:
+        message === undefined
+          ? undefined
+          : React.isValidElement(message)
+          ? JSON.stringify(message)
+          : typeof message === "object"
+          ? JSON.stringify(message)
+          : String(message),
+    });
+  };
 
   return {
     toasts,

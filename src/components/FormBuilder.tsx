@@ -7,6 +7,7 @@ import { cn } from "../lib/utils"
 import Button from "./Button"
 import Input from "./Input"
 import Card from "./Card"
+import { safeRender } from "@/lib/safeRender"
 
 interface FormField {
   id: string
@@ -188,7 +189,7 @@ export default function FormBuilder({ onSave, className }: FormBuilderProps) {
   const renderPreview = () => (
     <Card className="p-6">
       <h3 className="text-xl font-bold text-foreground mb-2">{title || "양식 제목"}</h3>
-      {description && <p className="text-muted-foreground mb-6">{description}</p>}
+      {description && <p className="text-muted-foreground mb-6">{safeRender(description)}</p>}
 
       <div className="space-y-6">
         {fields.map((field) => (

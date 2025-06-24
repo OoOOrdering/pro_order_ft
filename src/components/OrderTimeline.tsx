@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { cn } from "../lib/utils"
+import { safeRender } from "@/lib/safeRender"
 
 interface TimelineStep {
   id: string
@@ -60,7 +61,7 @@ export default function OrderTimeline({ steps, className }: OrderTimelineProps) 
               {selectedStep === step.id && (
                 <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-10 w-64 p-3 bg-card border rounded-lg shadow-lg animate-in zoom-in-95">
                   <h4 className="font-semibold text-foreground mb-1">{step.title}</h4>
-                  <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{safeRender(step.description)}</p>
                   {step.date && <p className="text-xs text-muted-foreground">📅 {step.date}</p>}
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-card border-l border-t rotate-45"></div>
                 </div>
@@ -119,7 +120,7 @@ export default function OrderTimeline({ steps, className }: OrderTimelineProps) 
               >
                 {step.title}
               </h4>
-              <p className="text-sm text-muted-foreground">{step.description}</p>
+              <p className="text-sm text-muted-foreground">{safeRender(step.description)}</p>
               {step.date && <p className="text-xs text-muted-foreground mt-1">{step.date}</p>}
             </div>
           </div>

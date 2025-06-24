@@ -78,7 +78,10 @@ export default function RegisterPage() {
       if (typeof errorData === "object") {
         setErrors(errorData)
       } else {
-        Toast.show({ type: "error", message: error || "회원가입에 실패했습니다" })
+        {
+          const err: any = error;
+          Toast.show({ type: "error", message: typeof err === "string" ? err : err?.message ? err.message : JSON.stringify(err) })
+        }
       }
     }
   }

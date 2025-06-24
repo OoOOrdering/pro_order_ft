@@ -1,13 +1,24 @@
 import * as React from "react"
+import { safeRender } from "@/lib/safeRender"
+import TextRenderer from "@/lib/safeTextRender"
+
+function safeRenderValue(value: any) {
+  if (React.isValidElement(value)) return value
+  if (typeof value === "object" && value !== null) return JSON.stringify(value)
+  return String(value)
+}
 
 interface PageHeaderProps {
-  title: string
-  subtitle?: string
+  title: any // string에서 any로 변경하여 방어
+  subtitle?: any
   action?: React.ReactNode
   breadcrumb?: Array<{ label: string; href?: string }>
 }
 
 export default function PageHeader({ title, subtitle, action, breadcrumb }: PageHeaderProps) {
+  console.log('PageHeader:title', typeof title, title)
+  console.log('PageHeader:subtitle', typeof subtitle, subtitle)
+
   return (
     <div className="mb-6 sm:mb-8">
       {breadcrumb && (
@@ -40,8 +51,8 @@ export default function PageHeader({ title, subtitle, action, breadcrumb }: Page
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{title}</h1>
-          {subtitle && <p className="mt-1 text-sm sm:text-base text-muted-foreground">{subtitle}</p>}
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground"><TextRenderer value={title} context="PageHeader.title" /></h1>
+          {subtitle && <p className="mt-1 text-sm sm:text-base text-muted-foreground"><TextRenderer value={subtitle} context="PageHeader.subtitle" /></p>}
         </div>
         {action && <div className="flex-shrink-0">{action}</div>}
       </div>

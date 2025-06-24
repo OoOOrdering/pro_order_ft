@@ -20,7 +20,18 @@ export default function NoticePage() {
     }
   );
   useEffect(() => {
-    if (error) Toast.show({ type: "error", message: error.message });
+    if (error) {
+      const err: any = error;
+      Toast.show({
+        type: "error",
+        message:
+          typeof err === "string"
+            ? err
+            : err?.message
+            ? err.message
+            : JSON.stringify(err),
+      });
+    }
   }, [error]);
 
   if (loading) return <Loading />;

@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import "../i18n/config"
 import ClientProviders from "./client-providers"
 import DefaultSeoWrapper from "./default-seo"
+import { ToastProvider } from "@/components/providers/toast-provider"
 
 export const metadata: Metadata = {
   title: "PR Order",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <DefaultSeoWrapper />
           {children}
         </ClientProviders>
+        <ToastProvider />
       </body>
     </html>
   )

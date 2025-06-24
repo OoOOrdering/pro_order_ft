@@ -7,6 +7,7 @@ import { cn } from "../lib/utils"
 import Button from "./Button"
 import Input from "./Input"
 import Card from "./Card"
+import { safeRender } from "@/lib/safeRender"
 
 interface FormField {
   id: string
@@ -217,7 +218,7 @@ export default function OrderForm({ formData, onSubmit, isAdmin = false, onEditF
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">{formData.title}</h1>
-              {formData.description && <p className="text-muted-foreground mt-2">{formData.description}</p>}
+              {formData.description && <p className="text-muted-foreground mt-2">{safeRender(formData.description)}</p>}
             </div>
             {isAdmin && onEditForm && (
               <Button variant="outline" size="sm" onClick={onEditForm}>
